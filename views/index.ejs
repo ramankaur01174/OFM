@@ -12,73 +12,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
-    <style>
-      body {
-        background-image: url("images/OSMOWs_LOGO.jpg");
-        background-size: contain;
-        background-position: center;
-        filter: contrast(1.2) brightness(1);
-        background-repeat: no-repeat;
-        margin: 0;
-        padding: 20px;
-        font-family: Arial, sans-serif;
-      }
-      h1 {
-        color: rgb(187, 6, 6);
-        font-weight: bold;
-        text-align: center;
-        padding: 10px;
-        border-radius: 50%;
-        background-color: rgba(255, 255, 255, 0.7);
-        display: inline-block;
-        margin: 0 auto;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      .card {
-        border: none;
-        padding: 20px;
-        text-align: center;
-        margin: 10px;
-        background: transparent;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-        transition: transform 0.3s ease-in-out;
-      }
-      .card:hover {
-        transform: translateY(-5px);
-      }
-      .card img {
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 5px;
-        margin-bottom: 5px;
-      }
-      .card .card-name {
-        margin-bottom: 10px;
-        font-size: 1em;
-        font-weight: bold;
-      }
-      .quantity-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .quantity-container button {
-        background-color: #378fe8dd;
-        color: #fff;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-        margin: 0 5px;
-      }
-      .quantity-container input {
-        width: 50px;
-        text-align: center;
-      }
-    </style>
+    <link rel="stylesheet" href="/styles/styles.css" />
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -119,19 +53,20 @@
     </nav>
     <div class="container text-center">
       <h1 class="main-title my-4">Osmow's Food Management</h1>
-      <div class="mb-4">
-        <button class="btn btn-primary mx-2" id="userBtn">User</button>
-        <button class="btn btn-primary mx-2" id="managerBtn">Manager</button>
+      <div class="button-container mb-4">
+        <% if (user && user.role === 'manager') { %>
+        <button id="reportBtn" class="btn btn-warning mx-2">
+          Generate Report
+        </button>
+        <button
+          class="btn btn-success mx-2"
+          data-toggle="modal"
+          data-target="#addProductModal"
+        >
+          Add Product
+        </button>
+        <% } %>
       </div>
-      <% if (user && user.role === 'manager') { %>
-      <button
-        class="btn btn-success mb-4"
-        data-toggle="modal"
-        data-target="#addProductModal"
-      >
-        Add Product
-      </button>
-      <% } %>
       <div class="row justify-content-center" id="grid-container">
         <% items.forEach(item => { %>
         <div class="col-6 col-md-3 col-lg-2 card">
@@ -173,11 +108,6 @@
         </div>
         <% }) %>
       </div>
-      <% if (user && user.role === 'manager') { %>
-      <button id="reportBtn" class="btn btn-warning mt-4">
-        Generate Report
-      </button>
-      <% } %>
     </div>
 
     <!-- Add Product Modal -->
@@ -203,7 +133,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <form id="addProductForm">
+            <form id="addProductForm" enctype="multipart/form-data">
               <div class="form-group">
                 <label for="productName">Product Name</label>
                 <input
@@ -211,25 +141,6 @@
                   class="form-control"
                   id="productName"
                   name="productName"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label for="description">Description</label>
-                <textarea
-                  class="form-control"
-                  id="description"
-                  name="description"
-                  required
-                ></textarea>
-              </div>
-              <div class="form-group">
-                <label for="price">Price</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  id="price"
-                  name="price"
                   required
                 />
               </div>
@@ -244,12 +155,13 @@
                 />
               </div>
               <div class="form-group">
-                <label for="image">Image</label>
+                <label for="image">Product Image</label>
                 <input
                   type="file"
-                  class="form-control"
+                  class="form-control-file"
                   id="image"
                   name="image"
+                  accept="image/*"
                   required
                 />
               </div>
@@ -263,151 +175,7 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-      document
-        .getElementById("logoutBtn")
-        .addEventListener("click", function () {
-          document.cookie =
-            "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          window.location.href = "/login";
-        });
-
-      document
-        .getElementById("reportBtn")
-        ?.addEventListener("click", async () => {
-          try {
-            const response = await fetch("/api/v1/products/report", {
-              method: "POST",
-            });
-            if (response.status === 200) {
-              alert("Report generated and sent successfully.");
-            } else {
-              alert("Error generating report.");
-            }
-          } catch (err) {
-            console.error("Error generating report:", err);
-          }
-        });
-
-      document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".decrement-btn").forEach((btn) => {
-          btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const id = this.dataset.id;
-            updateQuantity(id, "decrement");
-          });
-        });
-
-        document.querySelectorAll(".increment-btn").forEach((btn) => {
-          btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const id = this.dataset.id;
-            updateQuantity(id, "increment");
-          });
-        });
-
-        document.querySelectorAll(".order-btn").forEach((btn) => {
-          btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const id = this.dataset.id;
-            const quantity = prompt("Enter quantity to order:");
-            if (quantity && !isNaN(quantity) && quantity > 0) {
-              orderProduct(id, quantity);
-            } else {
-              alert("Please enter a valid quantity.");
-            }
-          });
-        });
-
-        document.querySelectorAll(".delete-btn").forEach((btn) => {
-          btn.addEventListener("click", async function (e) {
-            e.stopPropagation();
-            const id = this.dataset.id;
-            try {
-              const response = await fetch(`/api/v1/products/${id}`, {
-                method: "DELETE",
-              });
-              if (response.status === 204) {
-                alert("Product deleted successfully.");
-                window.location.reload();
-              } else {
-                alert("Error deleting product.");
-              }
-            } catch (err) {
-              console.error("Error deleting product:", err);
-            }
-          });
-        });
-
-        document
-          .getElementById("addProductForm")
-          .addEventListener("submit", async function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            try {
-              const response = await fetch("/api/v1/products", {
-                method: "POST",
-                body: formData,
-              });
-              const data = await response.json();
-              if (data.status === "success") {
-                alert("Product added successfully.");
-                window.location.reload();
-              } else {
-                alert(data.message);
-              }
-            } catch (err) {
-              console.error("Error adding product:", err);
-            }
-          });
-
-        async function updateQuantity(id, operation) {
-          try {
-            const response = await fetch(
-              `/api/v1/products/${id}/${operation}`,
-              {
-                method: "PATCH",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            const data = await response.json();
-            if (data.status === "success") {
-              const item = data.data.product;
-              const quantityInput = document.querySelector(
-                `.quantity-input[data-id="${item._id}"]`
-              );
-              quantityInput.value = item.quantity;
-            } else {
-              alert(data.message);
-            }
-          } catch (error) {
-            console.error("Error updating quantity:", error);
-          }
-        }
-
-        async function orderProduct(id, quantity) {
-          try {
-            const response = await fetch(`/api/v1/products/${id}/order`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ quantity }),
-            });
-            const data = await response.json();
-            if (data.status === "success") {
-              alert("Order placed successfully.");
-              window.location.reload();
-            } else {
-              alert(data.message);
-            }
-          } catch (err) {
-            console.error("Error placing order:", err);
-          }
-        }
-      });
-    </script>
+    <script src="/js/script.js"></script>
+    <script src="/js/addProductScript.js"></script>
   </body>
 </html>

@@ -8,11 +8,13 @@
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
+    <link rel="stylesheet" href="/styles/signup.css" />
   </head>
   <body>
     <div class="container">
+      <div class="brand-header">Osmow's Shawarma</div>
       <h1>Signup</h1>
-      <form action="/api/v1/users/signup" method="POST">
+      <form id="signupForm">
         <div class="form-group">
           <label for="name">Name:</label>
           <input
@@ -57,12 +59,14 @@
           <label for="role">Role:</label>
           <select class="form-control" id="role" name="role">
             <option value="user">User</option>
-            <option value="manager">Manager</option>
-            <option value="admin">Admin</option>
+            <option value="manager" id="managerOption">Manager</option>
+            <option value="admin" id="adminOption">Admin</option>
           </select>
         </div>
         <button type="submit" class="btn btn-primary">Signup</button>
       </form>
     </div>
+
+    <script src="/js/signup.js"></script>
   </body>
 </html>

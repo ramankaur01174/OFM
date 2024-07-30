@@ -23,8 +23,6 @@ exports.createProduct = async (req, res) => {
   try {
     const newProduct = await Product.create({
       productName: req.body.productName,
-      description: req.body.description,
-      price: req.body.price,
       lowStockLevel: req.body.lowStockLevel,
       imageUrl: req.file ? `/images/${req.file.filename}` : undefined,
     });
@@ -36,9 +34,10 @@ exports.createProduct = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Error creating product:", err);
     res.status(400).json({
       status: "fail",
-      message: err,
+      message: err.message || "An error occurred while creating the product",
     });
   }
 };

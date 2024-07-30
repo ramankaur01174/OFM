@@ -10,15 +10,43 @@ const signToken = (id) => {
 
 exports.signup = async (req, res) => {
   try {
-    const newUser = await User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm,
-      role: req.body.role, // Add the role to the new user
+    const { name, email, password, passwordConfirm, role } = req.body;
+
+    // Check if manager or admin already exists
+    const existingManagerOrAdmin = await User.findOne({
+      role: { $in: ["manager", "admin"] },
     });
 
-    res.redirect("/login");
+    if (existingManagerOrAdmin && (role === "manager" || role === "admin")) {
+      return res.status(400).json({
+        status: "fail",
+        message:
+          "Manager or Admin account already exists. Only user accounts can be created.",
+      });
+    }
+
+    const newUser = await User.create({
+      name,
+      email,
+      password,
+      passwordConfirm,
+      role,
+    });
+
+    const token = signToken(newUser._id);
+
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    });
+
+    res.status(201).json({
+      status: "success",
+      token,
+      data: {
+        user: newUser,
+      },
+    });
   } catch (err) {
     res.status(400).json({
       status: "fail",
@@ -189,6 +217,23 @@ exports.getMe = async (req, res) => {
     res.status(500).json({
       status: "error",
       message: err.message,
+    });
+  }
+};
+
+exports.checkRoles = async (req, res) => {
+  try {
+    const managerExists = await User.exists({ role: "manager" });
+    const adminExists = await User.exists({ role: "admin" });
+
+    res.status(200).json({
+      status: "success",
+      data: { managerExists, adminExists },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: "Server error while checking roles",
     });
   }
 };
