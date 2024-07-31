@@ -2,18 +2,33 @@ document
   .getElementById("logoutBtn")
   .addEventListener("click", async function () {
     try {
-      const response = await fetch("/api/v1/users/logout", {
+      await fetch("/api/v1/users/logout", {
         method: "POST",
       });
-      if (response.status === 200) {
-        window.location.href = "/login";
-      } else {
-        alert("Logout failed.");
-      }
+      document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      window.location.href = "/login";
     } catch (err) {
       console.error("Error logging out:", err);
     }
   });
+
+document.getElementById("reportBtn")?.addEventListener("click", async () => {
+  try {
+    const response = await fetch("/api/v1/products/report", {
+      method: "POST",
+    });
+    const data = await response.json();
+    if (data.status === "success") {
+      alert("Report generated and sent successfully.");
+      const downloadLink = document.getElementById("downloadLink");
+      downloadLink.href = data.downloadUrl;
+    } else {
+      alert("Error generating report.");
+    }
+  } catch (err) {
+    console.error("Error generating report:", err);
+  }
+});
 
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".decrement-btn").forEach((btn) => {
@@ -45,70 +60,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  document
-    .getElementById("addProductForm")
-    .addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const formData = new FormData(this);
+  document.querySelectorAll(".delete-btn").forEach((btn) => {
+    btn.addEventListener("click", async function (e) {
+      e.stopPropagation();
+      const id = this.dataset.id;
       try {
-        const response = await fetch("/api/v1/products", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await response.json();
-        if (data.status === "success") {
-          alert("Product added successfully.");
-          window.location.reload();
-        } else {
-          alert(data.message);
-        }
-      } catch (err) {
-        console.error("Error adding product:", err);
-      }
-    });
-
-  document
-    .getElementById("updateProductForm")
-    .addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const productId = document.getElementById("updateProductId").value;
-      const productName = document.getElementById("updateProductName").value;
-      const lowStockLevel = document.getElementById(
-        "updateLowStockLevel"
-      ).value;
-
-      const updateData = {};
-      if (productName) updateData.productName = productName;
-      if (lowStockLevel) updateData.lowStockLevel = parseInt(lowStockLevel);
-
-      try {
-        const response = await fetch(`/api/v1/products/${productId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updateData),
-        });
-        const data = await response.json();
-        if (data.status === "success") {
-          alert("Product updated successfully.");
-          window.location.reload();
-        } else {
-          alert(data.message);
-        }
-      } catch (err) {
-        console.error("Error updating product:", err);
-      }
-    });
-
-  document
-    .getElementById("deleteProductForm")
-    .addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const productId = document.getElementById("deleteProductId").value;
-
-      try {
-        const response = await fetch(`/api/v1/products/${productId}`, {
+        const response = await fetch(`/api/v1/products/${id}`, {
           method: "DELETE",
         });
         if (response.status === 204) {
@@ -121,6 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Error deleting product:", err);
       }
     });
+  });
 
   async function updateQuantity(id, operation) {
     try {
@@ -164,5 +122,24 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (err) {
       console.error("Error placing order:", err);
     }
+  }
+});
+document.getElementById("downloadLink")?.addEventListener("click", async () => {
+  try {
+    const response = await fetch("/api/v1/products/download-report");
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "product_report.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else {
+      alert("Error downloading report.");
+    }
+  } catch (err) {
+    console.error("Error downloading report:", err);
   }
 });
