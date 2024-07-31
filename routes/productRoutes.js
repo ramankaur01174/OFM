@@ -2,8 +2,8 @@ const express = require("express");
 const productController = require("./../controller/productController");
 const upload = require("../utils/multerConfig");
 const { protect, restrictTo } = require("../middleware/authMiddleware");
-
 const router = express.Router();
+const { isAuthenticated } = require("../middleware/authMiddleware");
 
 router
   .route("/")
@@ -34,6 +34,13 @@ router.post(
   protect,
   restrictTo("manager"),
   productController.generateReport
+);
+
+router.get(
+  "/download-report",
+  protect,
+  restrictTo("manager"),
+  productController.downloadReport
 );
 
 router.post(

@@ -237,3 +237,9 @@ exports.checkRoles = async (req, res) => {
     });
   }
 };
+exports.logout = (req, res) => {
+  res.cookie("jwt", "", { expires: new Date(0), httpOnly: true });
+  res
+    .status(200)
+    .json({ status: "success", message: "Logged out successfully" });
+};

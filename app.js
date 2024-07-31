@@ -5,11 +5,20 @@ const Item = require("./models/productModel");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const { checkUser } = require("./middleware/authMiddleware");
-
+const { checkUser, isLoggedIn } = require("./middleware/authMiddleware");
+const path = require("path");
 dotenv.config({ path: "./config.env" });
-
+const sendEmail = require("./utils/email");
 const app = express();
+
+// Serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, "public")));
+
+// Serve styles and js files from specific folders
+app.use("/styles", express.static(path.join(__dirname, "public/styles")));
+app.use("/js", express.static(path.join(__dirname, "public/js")));
+app.use(express.static(path.join(__dirname, "public")));
+
 app.use(cookieParser());
 app.set("view engine", "ejs");
 app.use(express.static("public"));
@@ -24,6 +33,7 @@ const DB = process.env.DATABASE.replace(
 mongoose
   .connect(DB, {
     useNewUrlParser: true,
+
     useUnifiedTopology: true,
   })
   .then(() => console.log("DB connection successful!"))
@@ -43,7 +53,7 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
-app.get("/", checkUser, async (req, res) => {
+app.get("/", isLoggedIn, async (req, res) => {
   try {
     const items = await Item.find();
     console.log("Fetched items:", items);

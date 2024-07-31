@@ -16,7 +16,7 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">Osmow's Shawarma</a>
+      <a class="navbar-brand" href="#">Humber International</a>
       <button
         class="navbar-toggler"
         type="button"
@@ -52,20 +52,25 @@
       </div>
     </nav>
     <div class="container text-center">
-      <h1 class="main-title my-4">Osmow's Food Management</h1>
+      <h1 class="main-title my-4">Humber International</h1>
       <div class="button-container mb-4">
-        <% if (user && user.role === 'manager') { %>
         <button id="reportBtn" class="btn btn-warning mx-2">
           Generate Report
         </button>
-        <button
-          class="btn btn-success mx-2"
-          data-toggle="modal"
-          data-target="#addProductModal"
+        <a
+          id="downloadLink"
+          class="btn btn-secondary mx-2"
+          href="#"
+          download="product_report.xlsx"
+          >Download Report</a
         >
-          Add Product
+        <button
+          class="btn btn-primary mx-2"
+          data-toggle="modal"
+          data-target="#managerModal"
+        >
+          Manager
         </button>
-        <% } %>
       </div>
       <div class="row justify-content-center" id="grid-container">
         <% items.forEach(item => { %>
@@ -76,7 +81,6 @@
             class="img-fluid"
           />
           <div class="card-name"><%= item.productName %></div>
-          <% if (user && user.role === 'manager') { %>
           <div class="quantity-container">
             <button data-id="<%= item._id %>" class="decrement-btn">-</button>
             <input
@@ -88,25 +92,57 @@
             />
             <button data-id="<%= item._id %>" class="increment-btn">+</button>
           </div>
-          <button
-            class="btn btn-danger btn-sm mt-2 delete-btn"
-            data-id="<%= item._id %>"
-          >
-            <i class="fas fa-trash"></i>
-          </button>
-          <% } else { %>
-          <div class="quantity-container">
-            Quantity Available: <%= item.quantity %>
-          </div>
-          <button
-            class="btn btn-success btn-sm mt-2 order-btn"
-            data-id="<%= item._id %>"
-          >
-            Order Now
-          </button>
-          <% } %>
         </div>
         <% }) %>
+      </div>
+    </div>
+
+    <!-- Manager Modal -->
+    <div
+      class="modal fade"
+      id="managerModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="managerModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="managerModalLabel">Manager Actions</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <button
+              class="btn btn-success mx-2"
+              data-toggle="modal"
+              data-target="#addProductModal"
+            >
+              Add Product
+            </button>
+            <button
+              class="btn btn-warning mx-2"
+              data-toggle="modal"
+              data-target="#updateProductModal"
+            >
+              Update Product
+            </button>
+            <button
+              class="btn btn-danger mx-2"
+              data-toggle="modal"
+              data-target="#deleteProductModal"
+            >
+              Delete Product
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -166,6 +202,114 @@
                 />
               </div>
               <button type="submit" class="btn btn-primary">Add Product</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Product Modal -->
+    <div
+      class="modal fade"
+      id="updateProductModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="updateProductModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateProductModalLabel">
+              Update Product
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="updateProductForm">
+              <div class="form-group">
+                <label for="updateProductId">Select Product</label>
+                <select id="updateProductId" class="form-control" required>
+                  <% items.forEach(item => { %>
+                  <option value="<%= item._id %>">
+                    <%= item.productName %>
+                  </option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="updateProductName">New Product Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="updateProductName"
+                  name="updateProductName"
+                />
+              </div>
+              <div class="form-group">
+                <label for="updateLowStockLevel">New Low Stock Level</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="updateLowStockLevel"
+                  name="updateLowStockLevel"
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Update Product
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Product Modal -->
+    <div
+      class="modal fade"
+      id="deleteProductModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="deleteProductModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteProductModalLabel">
+              Delete Product
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="deleteProductForm">
+              <div class="form-group">
+                <label for="deleteProductId">Select Product</label>
+                <select id="deleteProductId" class="form-control" required>
+                  <% items.forEach(item => { %>
+                  <option value="<%= item._id %>">
+                    <%= item.productName %>
+                  </option>
+                  <% }) %>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-danger">
+                Delete Product
+              </button>
             </form>
           </div>
         </div>

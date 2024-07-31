@@ -1,5 +1,7 @@
 const Product = require("../models/productModel");
-const sendEmail = require("./../utils/email");
+const sendEmail = require("../utils/email");
+const ExcelJS = require("exceljs");
+const path = require("path");
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -153,19 +155,40 @@ exports.decrementQuantity = async (req, res) => {
 exports.generateReport = async (req, res) => {
   try {
     const products = await Product.find();
-    const report = products
-      .map((product) => `${product.productName}: ${product.quantity}`)
-      .join("\n");
+    const reportData = products.map((product) => ({
+      productName: product.productName,
+      quantity: product.quantity,
+    }));
 
-    await sendEmail({
-      email: process.env.MANAGER_EMAIL,
-      subject: "Inventory Report",
-      message: report,
-    });
+    // Create a new Excel workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Product Report");
+
+    // Add headers
+    worksheet.columns = [
+      { header: "Product Name", key: "productName", width: 30 },
+      { header: "Quantity", key: "quantity", width: 10 },
+    ];
+
+    // Add data
+    worksheet.addRows(reportData);
+
+    // Define the file path for the report
+    const reportPath = path.join(
+      __dirname,
+      "..",
+      "public",
+      "reports",
+      "product_report.xlsx"
+    );
+
+    // Write the workbook to file
+    await workbook.xlsx.writeFile(reportPath);
 
     res.status(200).json({
       status: "success",
       message: "Report generated and sent successfully.",
+      downloadUrl: "/api/v1/products/download-report",
     });
   } catch (err) {
     console.error("Error generating report:", err);
@@ -174,6 +197,25 @@ exports.generateReport = async (req, res) => {
       message: "Error generating report: " + err.message,
     });
   }
+};
+
+exports.downloadReport = (req, res) => {
+  const reportPath = path.join(
+    __dirname,
+    "..",
+    "public",
+    "reports",
+    "product_report.xlsx"
+  );
+  res.download(reportPath, "product_report.xlsx", (err) => {
+    if (err) {
+      console.error("Error downloading report:", err);
+      res.status(500).json({
+        status: "error",
+        message: "Error downloading report: " + err.message,
+      });
+    }
+  });
 };
 
 exports.orderProduct = async (req, res) => {

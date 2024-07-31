@@ -7,6 +7,7 @@ router.route("/checkRoles").get(userController.checkRoles);
 
 router.post("/signup", userController.signup);
 router.post("/login", userController.login);
+router.post("/logout", userController.logout);
 
 router
   .route("/")

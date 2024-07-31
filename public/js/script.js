@@ -1,22 +1,19 @@
-document.getElementById("logoutBtn").addEventListener("click", function () {
-  document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  window.location.href = "/login";
-});
-
-document.getElementById("reportBtn")?.addEventListener("click", async () => {
-  try {
-    const response = await fetch("/api/v1/products/report", {
-      method: "POST",
-    });
-    if (response.status === 200) {
-      alert("Report generated and sent successfully.");
-    } else {
-      alert("Error generating report.");
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click", async function () {
+    try {
+      const response = await fetch("/api/v1/users/logout", {
+        method: "POST",
+      });
+      if (response.status === 200) {
+        window.location.href = "/login";
+      } else {
+        alert("Logout failed.");
+      }
+    } catch (err) {
+      console.error("Error logging out:", err);
     }
-  } catch (err) {
-    console.error("Error generating report:", err);
-  }
-});
+  });
 
 document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll(".decrement-btn").forEach((btn) => {
@@ -48,12 +45,70 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  document.querySelectorAll(".delete-btn").forEach((btn) => {
-    btn.addEventListener("click", async function (e) {
-      e.stopPropagation();
-      const id = this.dataset.id;
+  document
+    .getElementById("addProductForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
       try {
-        const response = await fetch(`/api/v1/products/${id}`, {
+        const response = await fetch("/api/v1/products", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        if (data.status === "success") {
+          alert("Product added successfully.");
+          window.location.reload();
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error("Error adding product:", err);
+      }
+    });
+
+  document
+    .getElementById("updateProductForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const productId = document.getElementById("updateProductId").value;
+      const productName = document.getElementById("updateProductName").value;
+      const lowStockLevel = document.getElementById(
+        "updateLowStockLevel"
+      ).value;
+
+      const updateData = {};
+      if (productName) updateData.productName = productName;
+      if (lowStockLevel) updateData.lowStockLevel = parseInt(lowStockLevel);
+
+      try {
+        const response = await fetch(`/api/v1/products/${productId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateData),
+        });
+        const data = await response.json();
+        if (data.status === "success") {
+          alert("Product updated successfully.");
+          window.location.reload();
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error("Error updating product:", err);
+      }
+    });
+
+  document
+    .getElementById("deleteProductForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const productId = document.getElementById("deleteProductId").value;
+
+      try {
+        const response = await fetch(`/api/v1/products/${productId}`, {
           method: "DELETE",
         });
         if (response.status === 204) {
@@ -66,7 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Error deleting product:", err);
       }
     });
-  });
 
   async function updateQuantity(id, operation) {
     try {

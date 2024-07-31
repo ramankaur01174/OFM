@@ -1,6 +1,20 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
+exports.isAuthenticated = (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (!token) {
+    return res.redirect("/login");
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.redirect("/login");
+  }
+};
+
 exports.protect = async (req, res, next) => {
   let token;
   if (req.cookies.jwt) {
@@ -76,4 +90,22 @@ exports.checkUser = async (req, res, next) => {
     req.user = null;
     return next();
   }
+};
+exports.isLoggedIn = (req, res, next) => {
+  if (!req.cookies || !req.cookies.jwt) {
+    return res.redirect("/login");
+  }
+
+  jwt.verify(req.cookies.jwt, process.env.JWT_SECRET, async (err, decoded) => {
+    if (err || !decoded) {
+      return res.redirect("/login");
+    }
+
+    req.user = await User.findById(decoded.id);
+    if (!req.user) {
+      return res.redirect("/login");
+    }
+
+    next();
+  });
 };
