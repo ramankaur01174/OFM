@@ -80,6 +80,55 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  document
+    .getElementById("updateProductForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const productId = document.getElementById("updateProductId").value;
+      const updateData = {
+        productName: document.getElementById("updateProductName").value,
+        lowStockLevel: document.getElementById("updateLowStockLevel").value,
+      };
+      try {
+        const response = await fetch(`/api/v1/products/${productId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updateData),
+        });
+        const data = await response.json();
+        if (data.status === "success") {
+          alert("Product updated successfully.");
+          window.location.reload();
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error("Error updating product:", err);
+      }
+    });
+
+  document
+    .getElementById("deleteProductForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const productId = document.getElementById("deleteProductId").value;
+      try {
+        const response = await fetch(`/api/v1/products/${productId}`, {
+          method: "DELETE",
+        });
+        if (response.status === 204) {
+          alert("Product deleted successfully.");
+          window.location.reload();
+        } else {
+          alert("Error deleting product.");
+        }
+      } catch (err) {
+        console.error("Error deleting product:", err);
+      }
+    });
+
   async function updateQuantity(id, operation) {
     try {
       const response = await fetch(`/api/v1/products/${id}/${operation}`, {
@@ -124,22 +173,26 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
-document.getElementById("downloadLink")?.addEventListener("click", async () => {
-  try {
-    const response = await fetch("/api/v1/products/download-report");
-    if (response.ok) {
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "product_report.xlsx";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } else {
-      alert("Error downloading report.");
+
+document
+  .getElementById("downloadLink")
+  ?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/v1/products/download-report");
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "product_report.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } else {
+        alert("Error downloading report.");
+      }
+    } catch (err) {
+      console.error("Error downloading report:", err);
     }
-  } catch (err) {
-    console.error("Error downloading report:", err);
-  }
-});
+  });

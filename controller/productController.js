@@ -75,14 +75,6 @@ exports.updateProduct = async (req, res) => {
       });
     }
 
-    if (product.quantity <= product.lowStockLevel) {
-      await sendEmail({
-        email: process.env.MANAGER_EMAIL,
-        subject: "Low Stock Alert",
-        message: `The stock for product ${product.productName} is low. Quantity: ${product.quantity}`,
-      });
-    }
-
     res.status(200).json({
       status: "success",
       data: {
@@ -99,7 +91,13 @@ exports.updateProduct = async (req, res) => {
 
 exports.deleteProduct = async (req, res) => {
   try {
-    await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Product not found",
+      });
+    }
     res.status(204).json({
       status: "success",
       data: null,
