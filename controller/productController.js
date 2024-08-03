@@ -2,6 +2,7 @@ const Product = require("../models/productModel");
 const sendEmail = require("../utils/email");
 const ExcelJS = require("exceljs");
 const path = require("path");
+const fs = require("fs");
 
 exports.getAllProducts = async (req, res) => {
   try {
@@ -185,9 +186,13 @@ exports.generateReport = async (req, res) => {
     });
   }
 };
+
 exports.downloadReport = async (req, res) => {
   try {
+    console.log("downloadReport function called");
     const products = await Product.find();
+    console.log("Products fetched:", products);
+
     const reportData = products.map((product) => ({
       productName: product.productName,
       quantity: product.quantity,
@@ -202,23 +207,32 @@ exports.downloadReport = async (req, res) => {
     ];
 
     worksheet.addRows(reportData);
+    console.log("Worksheet created with report data");
 
-    const reportPath = path.join(
-      __dirname,
-      "..",
-      "public",
-      "reports",
-      "product_report.xlsx"
-    );
+    // Ensure the reports directory exists
+    const reportsDir = path.join(__dirname, "..", "public", "reports");
+    if (!fs.existsSync(reportsDir)) {
+      fs.mkdirSync(reportsDir, { recursive: true });
+    }
 
+    const reportPath = path.join(reportsDir, "product_report.xlsx");
     await workbook.xlsx.writeFile(reportPath);
+    console.log("Excel file written to:", reportPath);
 
+    // Serve the file for download
     res.download(reportPath, "product_report.xlsx", (err) => {
       if (err) {
         console.error("Error downloading report:", err);
         res.status(500).json({
           status: "error",
           message: "Error downloading report: " + err.message,
+        });
+      } else {
+        // Clean up the temporary file after sending
+        fs.unlink(reportPath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error("Error deleting temp file:", unlinkErr);
+          }
         });
       }
     });
@@ -230,6 +244,7 @@ exports.downloadReport = async (req, res) => {
     });
   }
 };
+
 exports.orderProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

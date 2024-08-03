@@ -3,7 +3,15 @@ const productController = require("./../controller/productController");
 const upload = require("../utils/multerConfig");
 const { protect, restrictTo } = require("../middleware/authMiddleware");
 const router = express.Router();
-const { isAuthenticated } = require("../middleware/authMiddleware");
+
+router.get("/download-report", productController.downloadReport);
+
+router.post(
+  "/report",
+  protect,
+  restrictTo("manager"),
+  productController.generateReport
+);
 
 router
   .route("/")
@@ -28,20 +36,6 @@ router
 router
   .route("/:id/decrement")
   .patch(protect, restrictTo("manager"), productController.decrementQuantity);
-
-router.post(
-  "/report",
-  protect,
-  restrictTo("manager"),
-  productController.generateReport
-);
-
-router.get(
-  "/download-report",
-  protect,
-  restrictTo("manager"),
-  productController.downloadReport
-);
 
 router.post(
   "/:id/order",

@@ -179,7 +179,13 @@ document
   ?.addEventListener("click", async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/v1/products/download-report");
+      const response = await fetch("/api/v1/products/download-report", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${document.cookie.split("jwt=")[1]}`,
+        },
+      });
+
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -194,5 +200,6 @@ document
       }
     } catch (err) {
       console.error("Error downloading report:", err);
+      alert("Error downloading report.");
     }
   });

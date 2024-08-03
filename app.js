@@ -1,14 +1,19 @@
 const express = require("express");
 const productRouter = require("./routes/productRoutes");
 const userRouter = require("./routes/userRoutes");
-const Item = require("./models/productModel");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const { checkUser, isLoggedIn } = require("./middleware/authMiddleware");
 const path = require("path");
+const {
+  protect,
+  restrictTo,
+  isAuthenticated,
+} = require("./middleware/authMiddleware");
+const Product = require("./models/productModel"); // Import the Product model
+
 dotenv.config({ path: "./config.env" });
-const sendEmail = require("./utils/email");
+
 const app = express();
 
 // Serve static files from the "public" directory
@@ -52,21 +57,18 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
-app.get("/", isLoggedIn, async (req, res) => {
+app.get("/", isAuthenticated, async (req, res) => {
   try {
-    const items = await Item.find();
-    console.log("Fetched items:", items);
-    res.render("index", { items, user: req.user });
+    const products = await Product.find(); // Use the Product model
+    console.log("Fetched products:", products);
+    res.render("index", { items: products, user: req.user });
   } catch (err) {
     console.error("Error fetching items:", err);
     res.status(500).send("Error fetching items");
   }
 });
 
-app.get("/add-product", checkUser, (req, res) => {
-  if (!req.user || req.user.role !== "manager") {
-    return res.redirect("/login");
-  }
+app.get("/add-product", protect, restrictTo("manager"), (req, res) => {
   res.render("addProduct");
 });
 
