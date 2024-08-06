@@ -10,7 +10,7 @@ const {
   restrictTo,
   isAuthenticated,
 } = require("./middleware/authMiddleware");
-const Product = require("./models/productModel"); // Import the Product model
+const Product = require("./models/productModel");
 
 dotenv.config({ path: "./config.env" });
 
@@ -53,11 +53,9 @@ app.get("/login", (req, res) => {
 
 app.get("/", isAuthenticated, async (req, res) => {
   try {
-    const products = await Product.find(); // Use the Product model
-    console.log("Fetched products:", products);
+    const products = await Product.find();
     res.render("index", { items: products, user: req.user });
   } catch (err) {
-    console.error("Error fetching items:", err);
     res.status(500).send("Error fetching items");
   }
 });
