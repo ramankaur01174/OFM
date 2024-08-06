@@ -19,14 +19,8 @@ const app = express();
 // Serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, "public")));
 
-// Serve styles and js files from specific folders
-app.use("/styles", express.static(path.join(__dirname, "public/styles")));
-app.use("/js", express.static(path.join(__dirname, "public/js")));
-app.use(express.static(path.join(__dirname, "public")));
-
 app.use(cookieParser());
 app.set("view engine", "ejs");
-app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
