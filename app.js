@@ -23,6 +23,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/styles", express.static(path.join(__dirname, "public/styles")));
 app.use("/js", express.static(path.join(__dirname, "public/js")));
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/images',express.static(path.join(__dirname, "public/images")));
 
 app.use(cookieParser());
 app.set("view engine", "ejs");
