@@ -189,9 +189,7 @@ exports.generateReport = async (req, res) => {
 
 exports.downloadReport = async (req, res) => {
   try {
-    console.log("downloadReport function called");
     const products = await Product.find();
-    console.log("Products fetched:", products);
 
     const reportData = products.map((product) => ({
       productName: product.productName,
