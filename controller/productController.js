@@ -179,7 +179,6 @@ exports.generateReport = async (req, res) => {
       message: "Report generated and sent successfully.",
     });
   } catch (err) {
-    console.error("Error generating report:", err);
     res.status(500).json({
       status: "error",
       message: "Error generating report: " + err.message,
