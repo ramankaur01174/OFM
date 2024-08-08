@@ -9,7 +9,7 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
-
+//format of files
 const fileFilter = (req, file, cb) => {
   const fileTypes = /jpeg|jpg|png|gif/;
   const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
