@@ -204,7 +204,6 @@ exports.downloadReport = async (req, res) => {
     ];
 
     worksheet.addRows(reportData);
-    console.log("Worksheet created with report data");
 
     // Ensure the reports directory exists
     const reportsDir = path.join(__dirname, "..", "public", "reports");
