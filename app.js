@@ -24,6 +24,16 @@ app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Add the debugging route to list files in the public/images directory
+app.get("/debug/images", (req, res) => {
+  fs.readdir(path.join(__dirname, "public", "images"), (err, files) => {
+    if (err) {
+      return res.status(500).send("Error reading directory");
+    }
+    res.json(files);
+  });
+});
+
 const DB = process.env.DATABASE.replace(
   "<PASSWORD>",
   process.env.DATABASE_PASSWORD
