@@ -3,19 +3,28 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const destPath = path.join(__dirname, "..", "public", "images");
-    console.log("Saving file to:", destPath);
-    cb(null, destPath);
+    cb(null, "public/images");
   },
   filename: (req, file, cb) => {
-    const filename = `${file.fieldname}-${Date.now()}${path.extname(
-      file.originalname
-    )}`;
-    console.log("Filename:", filename);
-    cb(null, filename);
+    cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
 
-const upload = multer({ storage: storage });
+const fileFilter = (req, file, cb) => {
+  const fileTypes = /jpeg|jpg|png|gif/;
+  const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = fileTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Images Only!"));
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+});
 
 module.exports = upload;
