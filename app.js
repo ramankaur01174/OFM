@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const path = require("path");
+const fs = require("fs");
+
 const {
   protect,
   restrictTo,
