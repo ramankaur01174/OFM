@@ -5,7 +5,6 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const path = require("path");
-const fs = require("fs");
 
 const {
   protect,
@@ -18,11 +17,9 @@ dotenv.config({ path: "./config.env" });
 
 const app = express();
 
-// Serve static files from the "public" directory
-app.use(express.static(path.join(__dirname, "public")));
-
 app.use(cookieParser());
 app.set("view engine", "ejs");
+app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
